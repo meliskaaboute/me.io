@@ -112,6 +112,43 @@
       font-size: 0.9rem;
     }
 
+    /* ========== КНОПКИ УПРАВЛЕНИЯ ДЛЯ МОБИЛЬНЫХ ========== */
+    .mobile-controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 101;
+      display: none;
+      gap: 8px;
+    }
+
+    .mobile-control-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(20, 15, 35, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(200, 180, 255, 0.3);
+      color: #d0c5ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+    }
+
+    .mobile-control-btn:hover {
+      background: rgba(80, 60, 120, 0.5);
+      color: white;
+    }
+
+    .mobile-control-btn.active {
+      background: #9f7aff;
+      color: white;
+      border-color: #b8a2ff;
+    }
+
     /* Статистика (боковая панель) */
     .stats-panel {
       position: fixed;
@@ -126,6 +163,14 @@
       min-width: 220px;
       max-height: 400px;
       overflow-y: auto;
+      transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    }
+
+    .stats-panel.hidden {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      pointer-events: none;
     }
 
     .stats-title {
@@ -235,6 +280,14 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    }
+
+    .comments-section.hidden {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      pointer-events: none;
     }
 
     .comments-header {
@@ -496,6 +549,10 @@
         padding-top: 70px;
       }
 
+      .mobile-controls {
+        display: flex;
+      }
+
       .profile-card {
         padding: 1.5rem 1rem;
         max-width: 100%;
@@ -528,7 +585,7 @@
       /* Статистика на мобилке */
       .stats-panel {
         position: fixed;
-        top: 60px;
+        top: 70px;
         right: 10px;
         left: 10px;
         width: auto;
@@ -573,7 +630,7 @@
 
       .comment-input {
         padding: 10px 14px;
-        font-size: 16px; /* Предотвращает зум на iOS */
+        font-size: 16px;
       }
 
       .footer-meta {
@@ -581,7 +638,6 @@
       }
     }
 
-    /* Очень маленькие экраны */
     @media (max-width: 480px) {
       body {
         padding-top: 60px;
@@ -621,31 +677,6 @@
         font-size: 1.1rem;
       }
     }
-
-    /* Ландшафтная ориентация на мобилках */
-    @media (max-width: 768px) and (orientation: landscape) {
-      body {
-        padding-top: 10px;
-        align-items: center;
-      }
-
-      .profile-card {
-        padding: 1rem;
-      }
-
-      .avatar-wrapper {
-        width: 80px;
-        height: 80px;
-      }
-
-      .stats-panel {
-        max-height: 150px;
-      }
-
-      .comments-section {
-        max-height: 250px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -662,6 +693,16 @@
   <div class="device-indicator" id="deviceIndicator">
     <i class="fas fa-desktop"></i>
     <span id="deviceText">PC</span>
+  </div>
+
+  <!-- ========== КНОПКИ УПРАВЛЕНИЯ ДЛЯ МОБИЛЬНЫХ ========== -->
+  <div class="mobile-controls" id="mobileControls">
+    <div class="mobile-control-btn" id="toggleStatsBtn" title="Toggle statistics">
+      <i class="fas fa-chart-bar"></i>
+    </div>
+    <div class="mobile-control-btn" id="toggleCommentsBtn" title="Toggle comments">
+      <i class="far fa-comment-dots"></i>
+    </div>
   </div>
 
   <!-- Статистика по странам -->
@@ -743,45 +784,87 @@
       // ========== ОПРЕДЕЛЕНИЕ УСТРОЙСТВА ==========
       const deviceIndicator = document.getElementById('deviceIndicator');
       const deviceText = document.getElementById('deviceText');
+      const mobileControls = document.getElementById('mobileControls');
+      const toggleStatsBtn = document.getElementById('toggleStatsBtn');
+      const toggleCommentsBtn = document.getElementById('toggleCommentsBtn');
+      
+      let isMobile = false;
+      let statsVisible = true;
+      let commentsVisible = true;
       
       function detectDevice() {
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const isTablet = /iPad|Android(?!.*Mobile)/i.test(navigator.userAgent);
         const isTouchScreen = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
         
         let deviceType = 'PC';
         let deviceIcon = 'fa-desktop';
         
-        if (isMobile || isTouchScreen && window.innerWidth <= 768) {
+        if (isMobileDevice || (isTouchScreen && window.innerWidth <= 768)) {
           deviceType = 'Mobile';
           deviceIcon = 'fa-mobile-alt';
+          isMobile = true;
         }
         if (isTablet) {
           deviceType = 'Tablet';
           deviceIcon = 'fa-tablet-alt';
+          isMobile = true;
         }
         
         deviceText.textContent = deviceType;
         deviceIndicator.querySelector('i').className = `fas ${deviceIcon}`;
         
-        // Добавляем класс для мобильной адаптации
-        if (deviceType === 'Mobile' || deviceType === 'Tablet') {
-          document.body.classList.add('is-mobile');
+        // Показываем кнопки управления только на мобильных
+        if (isMobile) {
+          mobileControls.style.display = 'flex';
+        } else {
+          mobileControls.style.display = 'none';
+          // На ПК всегда показываем
+          statsPanel.classList.remove('hidden');
+          commentsSection.classList.remove('hidden');
         }
         
         console.log(`📱 Device detected: ${deviceType}`);
         return deviceType;
       }
 
-      // Запускаем определение устройства
       detectDevice();
-      
-      // Обновляем при изменении размера окна
-      window.addEventListener('resize', () => {
-        detectDevice();
-      });
+      window.addEventListener('resize', detectDevice);
+
+      // ========== УПРАВЛЕНИЕ ВИДИМОСТЬЮ ПАНЕЛЕЙ ==========
+      function toggleStats() {
+        if (statsPanel.classList.contains('hidden')) {
+          statsPanel.classList.remove('hidden');
+          toggleStatsBtn.classList.add('active');
+          statsVisible = true;
+        } else {
+          statsPanel.classList.add('hidden');
+          toggleStatsBtn.classList.remove('active');
+          statsVisible = false;
+        }
+      }
+
+      function toggleComments() {
+        if (commentsSection.classList.contains('hidden')) {
+          commentsSection.classList.remove('hidden');
+          toggleCommentsBtn.classList.add('active');
+          commentsVisible = true;
+        } else {
+          commentsSection.classList.add('hidden');
+          toggleCommentsBtn.classList.remove('active');
+          commentsVisible = false;
+        }
+      }
+
+      toggleStatsBtn.addEventListener('click', toggleStats);
+      toggleCommentsBtn.addEventListener('click', toggleComments);
+
+      // Инициализация активного состояния кнопок
+      toggleStatsBtn.classList.add('active');
+      toggleCommentsBtn.classList.add('active');
 
       // ========== ЭЛЕМЕНТЫ КОММЕНТАРИЕВ ==========
+      const commentsSection = document.getElementById('commentsSection');
       const commentsList = document.getElementById('commentsList');
       const commentInput = document.getElementById('commentInput');
       const commentSend = document.getElementById('commentSend');
