@@ -46,8 +46,8 @@
 
   <script>
     // ========== ВСТАВЬТЕ СВОИ КЛЮЧИ ЗДЕСЬ ==========
-    const JSONBIN_API_KEY = '$2a$10$ВАШ_MASTER_KEY'; // Получите на jsonbin.io
-    const JSONBIN_BIN_ID = 'ВАШ_BIN_ID'; // Создайте bin и скопируйте ID
+    const JSONBIN_API_KEY = '$2a$10$FPlK2jMNTWqD2q7nKVd8l.RmjOHBHroIRG9vK8gAUp/n7icOoQKjK'; // Получите на jsonbin.io
+    const JSONBIN_BIN_ID = '69d7cc6736566621a895d987'; // Создайте bin и скопируйте ID
     // ============================================
 
     const chatMessages = document.getElementById('chatMessages');
@@ -100,7 +100,7 @@
 
     // Загрузка сообщений с JSONBin
     async function loadMessages() {
-      if (!JSONBIN_API_KEY.includes('ВАШ')) {
+      if (!JSONBIN_API_KEY.includes('$2a$10$FPlK2jMNTWqD2q7nKVd8l.RmjOHBHroIRG9vK8gAUp/n7icOoQKjK')) {
         try {
           syncStatus.innerHTML = '🔄 Syncing...';
           const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
@@ -124,7 +124,7 @@
 
     // Отправка сообщения
     async function sendMessage(text, type = 'user') {
-      if (!JSONBIN_API_KEY.includes('ВАШ')) {
+      if (!JSONBIN_API_KEY.includes('$2a$10$FPlK2jMNTWqD2q7nKVd8l.RmjOHBHroIRG9vK8gAUp/n7icOoQKjK')) {
         try {
           syncStatus.innerHTML = '📤 Sending...';
           
