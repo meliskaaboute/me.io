@@ -4,17 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>SweetPaw · Live Chat</title>
-  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -24,300 +18,69 @@
       position: relative;
       overflow-x: hidden;
     }
+    #bgVideo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+    .video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: -1; }
+    body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(-45deg, #0f0c29, #1a1a2e, #16213e, #0f0c29); background-size: 400% 400%; z-index: -3; }
+    .enter-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 0.3s, visibility 0.3s; }
+    .enter-overlay.hidden { opacity: 0; visibility: hidden; }
+    .enter-text { color: rgba(255,255,255,0.7); font-size: 14px; text-transform: lowercase; }
 
-    #bgVideo {
+    /* Кнопки управления для мобильных */
+    .mobile-toggle {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -2;
-    }
-
-    .video-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: -1;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(-45deg, #0f0c29, #1a1a2e, #16213e, #0f0c29);
-      background-size: 400% 400%;
-      z-index: -3;
-    }
-
-    .enter-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000000;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-
-    .enter-overlay.hidden {
-      opacity: 0;
-      visibility: hidden;
-    }
-
-    .enter-text {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 14px;
-      font-weight: 400;
-      letter-spacing: 1px;
-      text-transform: lowercase;
-    }
-
-    /* ========== LIVE CHAT ========== */
-    .live-chat {
-      position: fixed;
-      bottom: 20px;
+      top: 20px;
       right: 20px;
-      z-index: 100;
-      width: 340px;
-      max-height: 450px;
-      background: rgba(15, 10, 25, 0.85);
-      backdrop-filter: blur(20px);
-      border-radius: 24px;
-      border: 1px solid rgba(200, 180, 255, 0.25);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    }
-
-    .chat-header {
-      padding: 14px 18px;
-      border-bottom: 1px solid rgba(200, 180, 255, 0.15);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(0, 0, 0, 0.2);
-    }
-
-    .chat-header i {
-      color: #44ff88;
-      font-size: 0.7rem;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    .chat-header h3 {
-      color: white;
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-
-    .online-count {
-      margin-left: auto;
-      background: rgba(68, 255, 136, 0.15);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.7rem;
-      color: #44ff88;
-      border: 1px solid rgba(68, 255, 136, 0.3);
-    }
-
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 300px;
-      min-height: 200px;
-    }
-
-    .message-item {
-      display: flex;
-      gap: 10px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .message-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #9f7aff, #c084fc);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      color: white;
-      flex-shrink: 0;
-    }
-
-    .message-content {
-      flex: 1;
-    }
-
-    .message-header {
-      display: flex;
-      align-items: baseline;
+      z-index: 200;
+      display: none;
       gap: 8px;
-      margin-bottom: 4px;
     }
-
-    .message-name {
-      font-weight: 600;
-      color: #c5b8ff;
-      font-size: 0.8rem;
-    }
-
-    .message-time {
-      font-size: 0.65rem;
-      color: #7a72a0;
-    }
-
-    .message-text {
-      color: #f0eaff;
-      font-size: 0.85rem;
-      line-height: 1.4;
-      word-break: break-word;
-    }
-
-    .system-message {
-      text-align: center;
-      color: #7a72a0;
-      font-size: 0.7rem;
-      padding: 5px;
-    }
-
-    .chat-input-area {
-      padding: 14px 16px;
-      border-top: 1px solid rgba(200, 180, 255, 0.15);
-      display: flex;
-      gap: 10px;
-      background: rgba(0, 0, 0, 0.2);
-    }
-
-    .chat-input {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(200, 180, 255, 0.2);
-      border-radius: 25px;
-      padding: 10px 16px;
-      color: white;
-      font-size: 0.85rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .chat-input:focus {
-      border-color: #9f7aff;
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .chat-input::placeholder {
-      color: #6a6290;
-    }
-
-    .chat-send {
-      background: #9f7aff;
-      border: none;
+    .toggle-btn {
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      width: 42px;
-      height: 42px;
+      background: rgba(20, 15, 35, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(200, 180, 255, 0.3);
+      color: #d0c5ff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color: white;
+      font-size: 1.2rem;
       transition: all 0.2s;
-      flex-shrink: 0;
     }
-
-    .chat-send:hover {
-      background: #b8a2ff;
-      transform: scale(1.05);
-    }
-
+    .toggle-btn.active { background: #9f7aff; color: white; }
+    
     /* Статистика */
     .stats-panel {
       position: fixed;
       top: 20px;
       right: 20px;
-      z-index: 99;
-      background: rgba(20, 15, 35, 0.6);
+      z-index: 150;
+      background: rgba(20, 15, 35, 0.8);
       backdrop-filter: blur(15px);
-      padding: 12px 18px;
+      padding: 15px 20px;
       border-radius: 20px;
       border: 1px solid rgba(200, 180, 255, 0.2);
       min-width: 200px;
       max-height: 350px;
       overflow-y: auto;
+      transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
     }
+    .stats-panel.hidden { opacity: 0; visibility: hidden; transform: translateY(-10px); pointer-events: none; }
+    .stats-title { color: #d0c5ff; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .country-list { display: flex; flex-direction: column; gap: 6px; }
+    .country-item { display: flex; align-items: center; justify-content: space-between; color: white; font-size: 0.8rem; }
+    .country-flag { font-size: 1.1rem; margin-right: 6px; }
+    .country-count { color: #9f7aff; font-weight: 600; }
 
-    .stats-title {
-      color: #d0c5ff;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .country-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .country-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: white;
-      font-size: 0.8rem;
-      padding: 3px 0;
-    }
-
-    .country-flag {
-      font-size: 1.1rem;
-      margin-right: 6px;
-    }
-
-    .country-count {
-      color: #9f7aff;
-      font-weight: 600;
-    }
-
+    /* Счётчик */
     .views-counter {
       position: fixed;
       bottom: 20px;
       left: 20px;
-      z-index: 99;
-      background: rgba(20, 15, 35, 0.5);
+      z-index: 150;
+      background: rgba(20, 15, 35, 0.6);
       backdrop-filter: blur(10px);
       padding: 8px 16px;
       border-radius: 40px;
@@ -329,202 +92,106 @@
       gap: 8px;
     }
 
-    .profile-card {
-      max-width: 480px;
-      width: 100%;
-      background: transparent;
-      border-radius: 42px;
-      padding: 2rem 1.5rem;
-      text-align: center;
-      z-index: 10;
-    }
-
-    .avatar-wrapper {
-      position: relative;
-      width: 110px;
-      height: 110px;
-      margin: 0 auto 1.2rem;
-    }
-
-    .avatar {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
-      padding: 3px;
-    }
-
-    .display-name {
-      font-size: 1.8rem;
-      font-weight: 600;
-      margin-bottom: 0.4rem;
-      color: white;
-    }
-
-    .bio {
-      font-size: 0.9rem;
-      color: #e0dbf5;
-      margin-bottom: 1.5rem;
-      padding: 0.4rem 1.2rem;
-      border-left: 3px solid #9f7aff;
-      display: inline-block;
-    }
-
-    .links-grid {
+    /* Live Chat */
+    .live-chat {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 150;
+      width: 340px;
+      max-height: 450px;
+      background: rgba(15, 10, 25, 0.9);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      border: 1px solid rgba(200, 180, 255, 0.25);
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-bottom: 12px;
+      overflow: hidden;
+      transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
     }
+    .live-chat.hidden { opacity: 0; visibility: hidden; transform: translateY(10px); pointer-events: none; }
+    .chat-header { padding: 14px 18px; border-bottom: 1px solid rgba(200, 180, 255, 0.15); display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); }
+    .chat-header i { color: #44ff88; font-size: 0.7rem; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .chat-header h3 { color: white; font-size: 0.9rem; font-weight: 600; }
+    .online-count { margin-left: auto; background: rgba(68,255,136,0.15); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; color: #44ff88; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; max-height: 280px; min-height: 200px; }
+    .message-item { display: flex; gap: 10px; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+    .message-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #9f7aff, #c084fc); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: white; flex-shrink: 0; }
+    .message-content { flex: 1; }
+    .message-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+    .message-name { font-weight: 600; color: #c5b8ff; font-size: 0.8rem; }
+    .message-time { font-size: 0.65rem; color: #7a72a0; }
+    .message-text { color: #f0eaff; font-size: 0.85rem; line-height: 1.4; word-break: break-word; }
+    .system-message { text-align: center; color: #7a72a0; font-size: 0.7rem; padding: 5px; }
+    .chat-input-area { padding: 14px 16px; border-top: 1px solid rgba(200, 180, 255, 0.15); display: flex; gap: 10px; background: rgba(0,0,0,0.2); }
+    .chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(200, 180, 255, 0.2); border-radius: 25px; padding: 10px 16px; color: white; font-size: 0.85rem; outline: none; }
+    .chat-input:focus { border-color: #9f7aff; }
+    .chat-send { background: #9f7aff; border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
 
-    .link-btn {
-      background: transparent;
-      border: 1.5px solid rgba(200, 180, 255, 0.35);
-      border-radius: 20px;
-      padding: 0.7rem 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      text-decoration: none;
-      color: #f0eaff;
-      font-weight: 500;
-      font-size: 0.95rem;
-      transition: all 0.25s;
-    }
+    /* Профиль */
+    .profile-card { max-width: 480px; width: 100%; background: transparent; border-radius: 42px; padding: 2rem 1.5rem; text-align: center; z-index: 10; }
+    .avatar-wrapper { width: 110px; height: 110px; margin: 0 auto 1.2rem; }
+    .avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.4); padding: 3px; }
+    .display-name { font-size: 1.8rem; font-weight: 600; color: white; }
+    .bio { font-size: 0.9rem; color: #e0dbf5; margin-bottom: 1.5rem; padding: 0.4rem 1.2rem; border-left: 3px solid #9f7aff; display: inline-block; }
+    .links-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .link-btn { background: transparent; border: 1.5px solid rgba(200, 180, 255, 0.35); border-radius: 20px; padding: 0.7rem 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; color: #f0eaff; font-weight: 500; font-size: 0.95rem; }
+    .link-btn i { font-size: 1.2rem; color: #d0c5ff; }
+    .footer-meta { margin-top: 1.2rem; font-size: 0.7rem; color: #b5aed4; display: flex; justify-content: center; gap: 12px; }
+    .footer-meta a { color: #d0c5ff; text-decoration: none; }
+    #bgAudio { display: none; }
 
-    .link-btn i {
-      font-size: 1.2rem;
-      color: #d0c5ff;
-    }
-
-    .link-btn:hover {
-      background: rgba(80, 60, 120, 0.2);
-      border-color: rgba(210, 180, 255, 0.6);
-    }
-
-    .footer-meta {
-      margin-top: 1.2rem;
-      font-size: 0.7rem;
-      color: #b5aed4;
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-    }
-
-    .footer-meta a {
-      color: #d0c5ff;
-      text-decoration: none;
-    }
-
-    #bgAudio {
-      display: none;
-    }
-
-    /* Мобильная адаптация */
     @media (max-width: 768px) {
-      body {
-        padding: 0.8rem;
-        padding-top: 20px;
-      }
-
-      .live-chat {
-        width: calc(100% - 20px);
-        right: 10px;
-        left: 10px;
-        bottom: 10px;
-        max-height: 380px;
-      }
-
-      .stats-panel {
-        top: 10px;
-        right: 10px;
-        left: 10px;
-        width: auto;
-        max-height: 200px;
-      }
-
-      .views-counter {
-        bottom: auto;
-        top: 10px;
-        left: 10px;
-        padding: 6px 12px;
-        font-size: 0.7rem;
-      }
-
-      .profile-card {
-        padding: 1rem 0.5rem;
-        margin-top: 50px;
-      }
-
-      .avatar-wrapper {
-        width: 90px;
-        height: 90px;
-      }
-
-      .display-name {
-        font-size: 1.5rem;
-      }
+      body { padding: 0.8rem; padding-top: 70px; }
+      .mobile-toggle { display: flex; }
+      .live-chat { width: calc(100% - 20px); right: 10px; left: 10px; bottom: 10px; max-height: 380px; }
+      .stats-panel { top: 70px; right: 10px; left: 10px; width: auto; max-height: 250px; }
+      .views-counter { bottom: auto; top: 10px; left: 10px; }
+      .profile-card { padding: 1rem 0.5rem; }
     }
   </style>
 </head>
 <body>
-  <video id="bgVideo" autoplay muted loop playsinline>
-    <source src="video/background.mp4" type="video/mp4">
-  </video>
+  <video id="bgVideo" autoplay muted loop playsinline><source src="video/background.mp4" type="video/mp4"></video>
   <div class="video-overlay"></div>
+  <audio id="bgAudio" loop><source src="music/background.mp3" type="audio/mpeg"></audio>
 
-  <audio id="bgAudio" loop>
-    <source src="music/background.mp3" type="audio/mpeg">
-  </audio>
+  <!-- Кнопки управления для мобильных -->
+  <div class="mobile-toggle" id="mobileToggle">
+    <div class="toggle-btn active" id="toggleStats" title="Статистика"><i class="fas fa-chart-bar"></i></div>
+    <div class="toggle-btn active" id="toggleChat" title="Чат"><i class="far fa-comment-dots"></i></div>
+  </div>
 
   <!-- Статистика -->
-  <div class="stats-panel" id="statsPanel" style="display: none;">
-    <div class="stats-title">
-      <i class="fas fa-globe"></i> Visitors
-    </div>
+  <div class="stats-panel" id="statsPanel">
+    <div class="stats-title"><i class="fas fa-globe"></i> Visitors</div>
     <div class="country-list" id="countryList"></div>
   </div>
 
   <!-- Счётчик -->
-  <div class="views-counter">
-    <i class="fas fa-eye"></i>
-    Views: <span id="viewCount">0</span>
-  </div>
+  <div class="views-counter"><i class="fas fa-eye"></i> Views: <span id="viewCount">0</span></div>
 
-  <!-- LIVE CHAT -->
+  <!-- Live Chat -->
   <div class="live-chat" id="liveChat">
     <div class="chat-header">
       <i class="fas fa-circle"></i>
       <h3>LIVE CHAT</h3>
       <span class="online-count" id="onlineCount">1 online</span>
     </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="system-message">Welcome to the chat! 👋</div>
-    </div>
+    <div class="chat-messages" id="chatMessages"><div class="system-message">Welcome! 👋</div></div>
     <div class="chat-input-area">
       <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." maxlength="150" enterkeyhint="send">
-      <button class="chat-send" id="chatSend">
-        <i class="fas fa-paper-plane"></i>
-      </button>
+      <button class="chat-send" id="chatSend"><i class="fas fa-paper-plane"></i></button>
     </div>
   </div>
 
+  <!-- Профиль -->
   <div class="profile-card">
-    <div class="avatar-wrapper">
-      <img class="avatar" id="avatarImg" src="avatar/avatar.png" alt="avatar"
-           onerror="this.src='https://ui-avatars.com/api/?name=SweetPaw&length=2&background=2a1e3c&color=fff&bold=true&size=128'">
-    </div>
-
+    <div class="avatar-wrapper"><img class="avatar" id="avatarImg" src="avatar/avatar.png" onerror="this.src='https://ui-avatars.com/api/?name=SweetPaw&length=2&background=2a1e3c&color=fff&size=128'"></div>
     <div class="display-name">SweetPaw</div>
-
-    <div class="bio">
-      <i class="fas fa-terminal" style="margin-right: 6px; opacity: 0.9;"></i> 
-      digital creator · 19 ✦
-    </div>
-
+    <div class="bio"><i class="fas fa-terminal" style="margin-right:6px;opacity:0.9"></i>digital creator · 19 ✦</div>
     <div class="links-grid">
       <a href="https://x.com/teriyakimoki" class="link-btn"><i class="fab fa-twitter"></i> Twitter / X</a>
       <a href="https://discord.com/users/385376961590984715" class="link-btn"><i class="fab fa-discord"></i> Discord</a>
@@ -533,289 +200,170 @@
       <a href="https://youtube.com/playlist?list=PLPODqnI0uKxVssMZQO6cq7advtmk_Lacq" class="link-btn"><i class="fab fa-youtube"></i> YouTube</a>
       <a href="https://twitch.tv/meliska_j" class="link-btn"><i class="fab fa-twitch"></i> Twitch</a>
     </div>
-
-    <div class="footer-meta">
-      <span><i class="far fa-gem"></i> links</span>
-      <span class="dot">◈</span>
-      <a href="https://t.me/std_root"><i class="far fa-envelope"></i> contact</a>
-    </div>
+    <div class="footer-meta"><span><i class="far fa-gem"></i> links</span> ◈ <a href="https://t.me/std_root"><i class="far fa-envelope"></i> contact</a></div>
   </div>
 
-  <div class="enter-overlay" id="enterOverlay">
-    <div class="enter-text">click to enter</div>
-  </div>
+  <div class="enter-overlay" id="enterOverlay"><div class="enter-text">click to enter</div></div>
 
   <script>
     (function() {
-      const bgVideo = document.getElementById('bgVideo');
       const bgAudio = document.getElementById('bgAudio');
       const enterOverlay = document.getElementById('enterOverlay');
       const viewCountSpan = document.getElementById('viewCount');
       const statsPanel = document.getElementById('statsPanel');
       const countryList = document.getElementById('countryList');
-
-      // ========== LIVE CHAT ==========
       const chatMessages = document.getElementById('chatMessages');
       const chatInput = document.getElementById('chatInput');
       const chatSend = document.getElementById('chatSend');
       const onlineCount = document.getElementById('onlineCount');
+      const liveChat = document.getElementById('liveChat');
+      const toggleStats = document.getElementById('toggleStats');
+      const toggleChat = document.getElementById('toggleChat');
 
-      // Генерация случайного имени и аватара для пользователя
-      const adjectives = ['Happy', 'Lucky', 'Sunny', 'Cool', 'Mega', 'Super', 'Neon', 'Cyber', 'Dark', 'Light'];
-      const nouns = ['Fox', 'Cat', 'Wolf', 'Panda', 'Tiger', 'Eagle', 'Dragon', 'Phoenix', 'Ninja', 'Pirate'];
-      
+      // Имя пользователя
+      const adjectives = ['Happy','Lucky','Sunny','Cool','Mega','Neon','Cyber'];
+      const nouns = ['Fox','Cat','Wolf','Panda','Tiger','Dragon','Ninja'];
       let userName = sessionStorage.getItem('chatName');
       let userAvatar = sessionStorage.getItem('chatAvatar');
-      
       if (!userName) {
-        const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-        const noun = nouns[Math.floor(Math.random() * nouns.length)];
-        userName = `${adj}${noun}${Math.floor(Math.random() * 100)}`;
-        userAvatar = userName.substring(0, 2).toUpperCase();
+        userName = adjectives[Math.floor(Math.random()*adjectives.length)] + nouns[Math.floor(Math.random()*nouns.length)] + Math.floor(Math.random()*100);
+        userAvatar = userName.substring(0,2).toUpperCase();
         sessionStorage.setItem('chatName', userName);
         sessionStorage.setItem('chatAvatar', userAvatar);
       }
+      const userId = sessionStorage.getItem('userId') || 'u_' + Date.now() + Math.random().toString(36);
+      if (!sessionStorage.getItem('userId')) sessionStorage.setItem('userId', userId);
 
-      // ID пользователя
-      const userId = sessionStorage.getItem('userId') || 'user_' + Date.now() + '_' + Math.random().toString(36);
-      if (!sessionStorage.getItem('userId')) {
-        sessionStorage.setItem('userId', userId);
-      }
-
-      // Хранилище сообщений в localStorage
-      const CHAT_STORAGE_KEY = 'liveChat_messages';
-      const ONLINE_USERS_KEY = 'liveChat_online';
-      const MESSAGE_EXPIRY = 30 * 60 * 1000; // 30 минут
-
-      // Очистка старых сообщений
-      function cleanOldMessages() {
-        const messages = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY)) || [];
+      // Live Chat
+      const CHAT_KEY = 'livechat_msgs';
+      const ONLINE_KEY = 'livechat_online';
+      
+      function cleanMessages() {
+        const msgs = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
         const now = Date.now();
-        const filtered = messages.filter(msg => now - msg.timestamp < MESSAGE_EXPIRY);
-        localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(filtered));
+        const filtered = msgs.filter(m => now - m.time < 3600000);
+        localStorage.setItem(CHAT_KEY, JSON.stringify(filtered));
         return filtered;
       }
 
-      // Обновление онлайн статуса
-      function updateOnlineStatus() {
-        const online = JSON.parse(localStorage.getItem(ONLINE_USERS_KEY)) || {};
+      function updateOnline() {
+        const online = JSON.parse(localStorage.getItem(ONLINE_KEY)) || {};
         online[userId] = Date.now();
-        
-        // Удаляем неактивных (более 30 секунд)
         const now = Date.now();
-        Object.keys(online).forEach(id => {
-          if (now - online[id] > 30000) {
-            delete online[id];
-          }
-        });
-        
-        localStorage.setItem(ONLINE_USERS_KEY, JSON.stringify(online));
-        
-        const count = Object.keys(online).length;
-        onlineCount.textContent = `${count} online`;
-        
-        return count;
+        Object.keys(online).forEach(id => { if (now - online[id] > 30000) delete online[id]; });
+        localStorage.setItem(ONLINE_KEY, JSON.stringify(online));
+        onlineCount.textContent = Object.keys(online).length + ' online';
       }
+      setInterval(updateOnline, 10000);
+      updateOnline();
 
-      // Периодическое обновление онлайна
-      setInterval(updateOnlineStatus, 10000);
-      updateOnlineStatus();
+      function escape(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-      // Загрузка сообщений
-      function loadMessages() {
-        const messages = cleanOldMessages();
-        displayMessages(messages);
-      }
-
-      // Отображение сообщений
-      function displayMessages(messages) {
-        if (messages.length === 0) {
-          chatMessages.innerHTML = '<div class="system-message">No messages yet. Say hi! 👋</div>';
-          return;
-        }
-
-        chatMessages.innerHTML = messages.slice(-50).map(msg => {
-          const date = new Date(msg.timestamp);
-          const timeStr = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-          const isSystem = msg.type === 'system';
-          
-          if (isSystem) {
-            return `<div class="system-message">${escapeHtml(msg.text)}</div>`;
-          }
-          
-          return `
-            <div class="message-item">
-              <div class="message-avatar">${escapeHtml(msg.avatar || '?')}</div>
-              <div class="message-content">
-                <div class="message-header">
-                  <span class="message-name">${escapeHtml(msg.name)}</span>
-                  <span class="message-time">${timeStr}</span>
-                </div>
-                <div class="message-text">${escapeHtml(msg.text)}</div>
-              </div>
-            </div>
-          `;
+      function displayMessages(msgs) {
+        if (!msgs.length) { chatMessages.innerHTML = '<div class="system-message">No messages yet 👋</div>'; return; }
+        chatMessages.innerHTML = msgs.slice(-50).map(m => {
+          if (m.type === 'system') return `<div class="system-message">${escape(m.text)}</div>`;
+          const d = new Date(m.time);
+          const time = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+          return `<div class="message-item"><div class="message-avatar">${escape(m.avatar||'?')}</div><div class="message-content"><div class="message-header"><span class="message-name">${escape(m.name)}</span><span class="message-time">${time}</span></div><div class="message-text">${escape(m.text)}</div></div></div>`;
         }).join('');
-        
-        // Автопрокрутка вниз
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
 
-      function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+      function loadMessages() {
+        const msgs = cleanMessages();
+        displayMessages(msgs);
       }
 
-      // Добавление сообщения
-      function addMessage(text, type = 'user', customName = null, customAvatar = null) {
-        const messages = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY)) || [];
-        
-        messages.push({
-          text: text,
-          name: customName || userName,
-          avatar: customAvatar || userAvatar,
-          timestamp: Date.now(),
-          type: type,
-          userId: userId
-        });
-        
-        // Ограничение на 100 сообщений
-        if (messages.length > 100) {
-          messages.splice(0, messages.length - 100);
-        }
-        
-        localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
-        displayMessages(messages);
+      function addMessage(text, type = 'user') {
+        const msgs = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
+        msgs.push({ text, name: userName, avatar: userAvatar, time: Date.now(), type, userId });
+        if (msgs.length > 100) msgs.splice(0, msgs.length - 100);
+        localStorage.setItem(CHAT_KEY, JSON.stringify(msgs));
+        displayMessages(msgs);
       }
 
-      // Отправка сообщения
       function sendMessage() {
         const text = chatInput.value.trim();
-        if (text) {
-          addMessage(text);
-          chatInput.value = '';
-        }
+        if (text) { addMessage(text); chatInput.value = ''; }
       }
 
-      // Системное сообщение о входе
       function sendJoinMessage() {
-        const messages = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY)) || [];
-        const hasRecentJoin = messages.some(msg => 
-          msg.type === 'system' && 
-          msg.text.includes(userName) && 
-          Date.now() - msg.timestamp < 5000
-        );
-        
-        if (!hasRecentJoin) {
-          addMessage(`${userName} joined the chat`, 'system');
-        }
+        const msgs = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
+        const recent = msgs.some(m => m.type === 'system' && m.text.includes(userName) && Date.now() - m.time < 5000);
+        if (!recent) addMessage(`${userName} joined`, 'system');
       }
 
       chatSend.addEventListener('click', sendMessage);
-      chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-      });
+      chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
 
-      // Периодическая проверка новых сообщений (Live!)
+      let lastMsgCount = 0;
       setInterval(() => {
-        const messages = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY)) || [];
-        const currentCount = chatMessages.children.length;
-        if (messages.length !== currentCount) {
-          displayMessages(messages);
-        }
-      }, 2000);
+        const msgs = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
+        if (msgs.length !== lastMsgCount) { displayMessages(msgs); lastMsgCount = msgs.length; }
+      }, 1500);
 
-      // ========== СТАТИСТИКА ==========
-      function getFlagEmoji(code) {
+      // Статистика
+      function getFlag(code) {
         if (!code || code === 'XX') return '🌍';
-        const points = code.toUpperCase().split('').map(c => 127397 + c.charCodeAt());
-        return String.fromCodePoint(...points);
+        return String.fromCodePoint(...code.toUpperCase().split('').map(c => 127397 + c.charCodeAt()));
       }
-
-      const countryNames = {
-        'RU': 'Russia', 'US': 'USA', 'GB': 'UK', 'DE': 'Germany',
-        'FR': 'France', 'UA': 'Ukraine', 'BY': 'Belarus', 'KZ': 'Kazakhstan',
-        'CN': 'China', 'JP': 'Japan', 'KR': 'S. Korea', 'IN': 'India',
-        'BR': 'Brazil', 'CA': 'Canada', 'AU': 'Australia', 'IT': 'Italy',
-        'ES': 'Spain', 'NL': 'Netherlands', 'PL': 'Poland', 'TR': 'Turkey'
-      };
-
-      async function getCountry() {
-        try {
-          const res = await fetch('https://ipapi.co/json/');
-          const data = await res.json();
-          return { code: data.country_code || 'XX', name: data.country_name || countryNames[data.country_code] || 'Unknown' };
-        } catch {
-          return { code: 'XX', name: 'Unknown' };
-        }
-      }
+      const names = { RU:'Russia', US:'USA', GB:'UK', DE:'Germany', FR:'France', UA:'Ukraine', BY:'Belarus', KZ:'Kazakhstan', CN:'China', JP:'Japan', KR:'S.Korea', IN:'India', BR:'Brazil', CA:'Canada', AU:'Australia', IT:'Italy', ES:'Spain', NL:'Netherlands', PL:'Poland', TR:'Turkey' };
 
       async function updateStats() {
-        const country = await getCountry();
-        let stats = JSON.parse(localStorage.getItem('countryStats')) || {};
-        stats[country.code] = (stats[country.code] || 0) + 1;
-        localStorage.setItem('countryStats', JSON.stringify(stats));
-        
-        const sorted = Object.entries(stats).sort((a, b) => b[1] - a[1]).slice(0, 8);
-        countryList.innerHTML = sorted.map(([code, count]) => `
-          <div class="country-item">
-            <span><span class="country-flag">${getFlagEmoji(code)}</span> ${countryNames[code] || code}</span>
-            <span class="country-count">${count}</span>
-          </div>
-        `).join('');
-        
-        statsPanel.style.display = 'block';
+        try {
+          const res = await fetch('https://ipapi.co/json/');
+          const d = await res.json();
+          const code = d.country_code || 'XX';
+          let stats = JSON.parse(localStorage.getItem('countryStats')) || {};
+          stats[code] = (stats[code] || 0) + 1;
+          localStorage.setItem('countryStats', JSON.stringify(stats));
+          const sorted = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0,8);
+          countryList.innerHTML = sorted.map(([c, n]) => `<div class="country-item"><span><span class="country-flag">${getFlag(c)}</span> ${names[c]||c}</span><span class="country-count">${n}</span></div>`).join('');
+          statsPanel.style.display = 'block';
+        } catch(e) {}
       }
 
-      function updateViewCount() {
-        let views = parseInt(localStorage.getItem('profileViews')) || 0;
-        views++;
-        localStorage.setItem('profileViews', views);
-        viewCountSpan.textContent = views;
+      function updateViews() {
+        let v = parseInt(localStorage.getItem('profileViews')) || 0;
+        v++; localStorage.setItem('profileViews', v);
+        viewCountSpan.textContent = v;
       }
 
       async function initStats() {
         if (!sessionStorage.getItem('statsUpdated')) {
-          updateViewCount();
+          updateViews();
           await updateStats();
-          sessionStorage.setItem('statsUpdated', 'true');
+          sessionStorage.setItem('statsUpdated', '1');
         } else {
           viewCountSpan.textContent = localStorage.getItem('profileViews') || 0;
           const stats = JSON.parse(localStorage.getItem('countryStats')) || {};
-          const sorted = Object.entries(stats).sort((a, b) => b[1] - a[1]).slice(0, 8);
-          countryList.innerHTML = sorted.map(([code, count]) => `
-            <div class="country-item">
-              <span><span class="country-flag">${getFlagEmoji(code)}</span> ${countryNames[code] || code}</span>
-              <span class="country-count">${count}</span>
-            </div>
-          `).join('');
+          const sorted = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0,8);
+          countryList.innerHTML = sorted.map(([c, n]) => `<div class="country-item"><span><span class="country-flag">${getFlag(c)}</span> ${names[c]||c}</span><span class="country-count">${n}</span></div>`).join('');
           statsPanel.style.display = 'block';
         }
       }
 
-      bgVideo.querySelector('source').src = 'video/background.mp4';
-      bgAudio.querySelector('source').src = 'music/background.mp3';
-      bgVideo.load();
-      bgAudio.load();
+      // Управление видимостью
+      toggleStats.addEventListener('click', () => {
+        statsPanel.classList.toggle('hidden');
+        toggleStats.classList.toggle('active');
+      });
+      toggleChat.addEventListener('click', () => {
+        liveChat.classList.toggle('hidden');
+        toggleChat.classList.toggle('active');
+      });
 
+      // Запуск
       let audioStarted = false;
-
       function startSite() {
-        if (!audioStarted) {
-          bgAudio.volume = 0.4;
-          bgAudio.play().catch(() => {});
-          audioStarted = true;
-        }
+        if (!audioStarted) { bgAudio.volume = 0.3; bgAudio.play().catch(()=>{}); audioStarted = true; }
         enterOverlay.classList.add('hidden');
         initStats();
         loadMessages();
         sendJoinMessage();
       }
-
       enterOverlay.addEventListener('click', startSite);
-      
-      // Предзагрузка сообщений
       loadMessages();
     })();
   </script>
