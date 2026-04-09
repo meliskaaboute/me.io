@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>SweetPaw · links</title>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      color: #f0f0f0;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Видео фон */
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
+
+    /* Затемнение поверх видео */
+    .video-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: -1;
+    }
+
+    /* Градиентный фон (запасной) */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(-45deg, #0f0c29, #1a1a2e, #16213e, #0f0c29);
+      background-size: 400% 400%;
+      z-index: -3;
+    }
+
+    /* Чёрный оверлей с надписью */
+    .enter-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .enter-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .enter-text {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-transform: lowercase;
+    }
+
+    /* Статистика (боковая панель) */
+    .stats-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+      background: rgba(20, 15, 35, 0.6);
+      backdrop-filter: blur(15px);
+      padding: 15px 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(200, 180, 255, 0.2);
+      min-width: 220px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .stats-title {
+      color: #d0c5ff;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stats-title i {
+      color: #9f7aff;
+    }
+
+    .country-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .country-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      font-size: 0.85rem;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .country-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .country-flag {
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+
+    .country-count {
+      color: #9f7aff;
+      font-weight: 600;
+    }
+
+    .your-country {
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(200, 180, 255, 0.3);
+      color: #c5b8ff;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .your-country i {
+      color: #44ff88;
+      font-size: 0.6rem;
+    }
+
+    /* Счётчик просмотров */
+    .views-counter {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 100;
+      background: rgba(20, 15, 35, 0.5);
+      backdrop-filter: blur(10px);
+      padding: 8px 16px;
+      border-radius: 40px;
+      border: 1px solid rgba(200, 180, 255, 0.2);
+      font-size: 0.85rem;
+      color: #d0c5ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .views-counter i {
+      color: #9f7aff;
+      font-size: 1rem;
+    }
+
+    .views-counter span {
+      font-weight: 600;
+      color: white;
+      margin-left: 4px;
+    }
+
+    /* ========== ПАНЕЛЬ КОММЕНТАРИЕВ (АНОНИМНЫЕ) ========== */
+    .comments-section {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      width: 320px;
+      max-height: 400px;
+      background: rgba(20, 15, 35, 0.7);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      border: 1px solid rgba(200, 180, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .comments-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(200, 180, 255, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #d0c5ff;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .comments-header i {
+      color: #9f7aff;
+    }
+
+    .comments-header span {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: #9f7aff;
+    }
+
+    .comments-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 250px;
+    }
+
+    .comment-item {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .comment-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .comment-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #9f7aff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: white;
+      font-weight: 600;
+    }
+
+    .comment-name {
+      font-weight: 600;
+      color: white;
+      font-size: 0.8rem;
+    }
+
+    .comment-time {
+      margin-left: auto;
+      font-size: 0.65rem;
+      color: #9a93c0;
+    }
+
+    .comment-text {
+      color: #d5d0f0;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      padding-left: 32px;
+    }
+
+    .comment-form {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(200, 180, 255, 0.15);
+      display: flex;
+      gap: 8px;
+    }
+
+    .comment-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(200, 180, 255, 0.2);
+      border-radius: 20px;
+      padding: 8px 14px;
+      color: white;
+      font-size: 0.8rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .comment-input:focus {
+      border-color: #9f7aff;
+    }
+
+    .comment-input::placeholder {
+      color: #7a72a0;
+    }
+
+    .comment-send {
+      background: #9f7aff;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      transition: all 0.2s;
+    }
+
+    .comment-send:hover {
+      background: #b8a2ff;
+      transform: scale(1.05);
+    }
+
+    .comment-send i {
+      font-size: 0.9rem;
+    }
+
+    .no-comments {
+      text-align: center;
+      color: #7a72a0;
+      font-size: 0.8rem;
+      padding: 20px;
+    }
+
+    .profile-card {
+      max-width: 520px;
+      width: 100%;
+      background: transparent;
+      border-radius: 42px;
+      padding: 2.5rem 2rem 2.5rem;
+      text-align: center;
+      transition: transform 0.3s ease;
+      position: relative;
+      z-index: 10;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 
+        0 0 0 2px rgba(150, 120, 255, 0.4),
+        0 10px 30px -5px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(130, 100, 255, 0.4);
+      background: #1e1e2a;
+      padding: 3px;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 2;
+    }
+
+    .avatar:hover {
+      box-shadow: 
+        0 0 0 3px rgba(200, 170, 255, 0.6),
+        0 15px 35px -5px rgba(0, 0, 0, 0.7),
+        0 0 45px #9f7aff80;
+      transform: scale(1.02);
+    }
+
+    .display-name {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      color: white;
+      text-shadow: 
+        0 2px 10px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(180, 150, 255, 0.5);
+      letter-spacing: -0.01em;
+    }
+
+    .bio {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #e0dbf5;
+      margin-bottom: 1.8rem;
+      padding: 0.5rem 1.3rem;
+      font-weight: 400;
+      background: transparent;
+      border-radius: 30px;
+      display: inline-block;
+      border-left: 3px solid #9f7aff;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .links-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .link-btn {
+      background: transparent;
+      border: 1.5px solid rgba(200, 180, 255, 0.35);
+      border-radius: 20px;
+      padding: 0.75rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #f0eaff;
+      font-weight: 500;
+      font-size: 1rem;
+      transition: all 0.25s;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .link-btn i {
+      font-size: 1.3rem;
+      width: 24px;
+      color: #d0c5ff;
+    }
+
+    .link-btn:hover {
+      background: rgba(80, 60, 120, 0.15);
+      border-color: rgba(210, 180, 255, 0.6);
+      transform: scale(1.01) translateY(-2px);
+      box-shadow: 0 0 20px rgba(160, 120, 255, 0.2);
+      color: white;
+    }
+
+    .footer-meta {
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
+      color: #b5aed4;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .footer-meta a {
+      color: #d0c5ff;
+      text-decoration: none;
+    }
+
+    #bgAudio {
+      display: none;
+    }
+
+    @media (max-width: 480px) {
+      .stats-panel { top: 10px; right: 10px; min-width: 180px; padding: 12px 15px; }
+      .comments-section { width: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <video id="bgVideo" autoplay muted loop playsinline>
+    <source src="video/background.mp4" type="video/mp4">
+  </video>
+  <div class="video-overlay"></div>
+
+  <audio id="bgAudio" loop>
+    <source src="music/background.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Статистика по странам -->
+  <div class="stats-panel" id="statsPanel" style="display: none;">
+    <div class="stats-title">
+      <i class="fas fa-globe"></i> Visitors by country
+    </div>
+    <div class="country-list" id="countryList"></div>
+    <div class="your-country" id="yourCountry"></div>
+  </div>
+
+  <!-- Счётчик просмотров -->
+  <div class="views-counter">
+    <i class="fas fa-eye"></i>
+    Profile views: <span id="viewCount">0</span>
+  </div>
+
+  <!-- ========== ПАНЕЛЬ АНОНИМНЫХ КОММЕНТАРИЕВ ========== -->
+  <div class="comments-section" id="commentsSection">
+    <div class="comments-header">
+      <i class="far fa-comments"></i>
+      Comments
+      <span id="commentCount">0</span>
+    </div>
+    <div class="comments-list" id="commentsList">
+      <div class="no-comments">No comments yet. Be the first!</div>
+    </div>
+    <div class="comment-form">
+      <input type="text" class="comment-input" id="commentInput" placeholder="Write a comment..." maxlength="150">
+      <button class="comment-send" id="commentSend">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="profile-card">
+    <div class="avatar-wrapper">
+      <img class="avatar" id="avatarImg" src="avatar/avatar.png" alt="avatar"
+           onerror="this.src='https://ui-avatars.com/api/?name=SweetPaw&length=2&background=2a1e3c&color=fff&bold=true&size=128'">
+    </div>
+
+    <div class="display-name">SweetPaw</div>
+
+    <div class="bio">
+      <i class="fas fa-terminal" style="margin-right: 6px; opacity: 0.9;"></i> 
+      digital creator · 19 ✦
+    </div>
+
+    <div class="links-grid">
+      <a href="https://x.com/teriyakimoki" class="link-btn"><i class="fab fa-twitter"></i> Twitter / X</a>
+      <a href="https://discord.com/users/385376961590984715" class="link-btn"><i class="fab fa-discord"></i> Discord</a>
+      <a href="https://github.com/meliskaaboute" class="link-btn"><i class="fab fa-github"></i> GitHub</a>
+      <a href="https://steamcommunity.com/id/ThatDamnNeil" class="link-btn"><i class="fab fa-steam"></i> Steam</a>
+      <a href="https://youtube.com/playlist?list=PLPODqnI0uKxVssMZQO6cq7advtmk_Lacq" class="link-btn"><i class="fab fa-youtube"></i> YouTube</a>
+      <a href="https://twitch.tv/meliska_j" class="link-btn"><i class="fab fa-twitch"></i> Twitch</a>
+    </div>
+
+    <div class="footer-meta">
+      <span><i class="far fa-gem"></i> links</span>
+      <span class="dot">◈</span>
+      <a href="https://t.me/std_root"><i class="far fa-envelope"></i> contact</a>
+    </div>
+  </div>
+
+  <div class="enter-overlay" id="enterOverlay">
+    <div class="enter-text">click to enter</div>
+  </div>
+
+  <script>
+    (function() {
+      const bgVideo = document.getElementById('bgVideo');
+      const bgAudio = document.getElementById('bgAudio');
+      const enterOverlay = document.getElementById('enterOverlay');
+      const viewCountSpan = document.getElementById('viewCount');
+      const statsPanel = document.getElementById('statsPanel');
+      const countryList = document.getElementById('countryList');
+      const yourCountry = document.getElementById('yourCountry');
+
+      // ========== ЭЛЕМЕНТЫ КОММЕНТАРИЕВ ==========
+      const commentsList = document.getElementById('commentsList');
+      const commentInput = document.getElementById('commentInput');
+      const commentSend = document.getElementById('commentSend');
+      const commentCount = document.getElementById('commentCount');
+
+      bgVideo.querySelector('source').src = 'video/background.mp4';
+      bgAudio.querySelector('source').src = 'music/background.mp3';
+      
+      bgVideo.load();
+      bgAudio.load();
+
+      // ========== СИСТЕМА АНОНИМНЫХ КОММЕНТАРИЕВ ==========
+      function loadComments() {
+        const comments = JSON.parse(localStorage.getItem('profileComments')) || [];
+        displayComments(comments);
+      }
+
+      function displayComments(comments) {
+        if (comments.length === 0) {
+          commentsList.innerHTML = '<div class="no-comments">No comments yet. Be the first!</div>';
+          commentCount.textContent = '0';
+          return;
+        }
+
+        commentsList.innerHTML = comments.slice().reverse().map((comment) => {
+          const date = new Date(comment.timestamp);
+          const timeStr = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+          
+          return `
+            <div class="comment-item">
+              <div class="comment-header">
+                <div class="comment-avatar">👤</div>
+                <span class="comment-name">Anonymous</span>
+                <span class="comment-time">${timeStr}</span>
+              </div>
+              <div class="comment-text">${escapeHtml(comment.text)}</div>
+            </div>
+          `;
+        }).join('');
+        
+        commentCount.textContent = comments.length;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function addComment(text) {
+        const comments = JSON.parse(localStorage.getItem('profileComments')) || [];
+        comments.push({
+          text: text,
+          timestamp: Date.now()
+        });
+        localStorage.setItem('profileComments', JSON.stringify(comments));
+        displayComments(comments);
+      }
+
+      function sendComment() {
+        const text = commentInput.value.trim();
+        if (text) {
+          addComment(text);
+          commentInput.value = '';
+        }
+      }
+
+      commentSend.addEventListener('click', sendComment);
+      commentInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendComment();
+      });
+
+      // ========== СТАТИСТИКА ==========
+      function getFlagEmoji(countryCode) {
+        if (!countryCode || countryCode === 'XX') return '🌍';
+        const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt());
+        return String.fromCodePoint(...codePoints);
+      }
+
+      const countryNames = {
+        'RU': 'Russia', 'US': 'United States', 'GB': 'United Kingdom', 'DE': 'Germany',
+        'FR': 'France', 'UA': 'Ukraine', 'BY': 'Belarus', 'KZ': 'Kazakhstan',
+        'CN': 'China', 'JP': 'Japan', 'KR': 'South Korea', 'IN': 'India',
+        'BR': 'Brazil', 'CA': 'Canada', 'AU': 'Australia', 'IT': 'Italy',
+        'ES': 'Spain', 'NL': 'Netherlands', 'PL': 'Poland', 'TR': 'Turkey',
+        'SE': 'Sweden', 'NO': 'Norway', 'FI': 'Finland', 'DK': 'Denmark',
+        'CH': 'Switzerland', 'AT': 'Austria', 'BE': 'Belgium', 'PT': 'Portugal',
+        'GR': 'Greece', 'CZ': 'Czech Republic', 'RO': 'Romania', 'HU': 'Hungary',
+        'MX': 'Mexico', 'AR': 'Argentina', 'CL': 'Chile', 'CO': 'Colombia',
+        'ZA': 'South Africa', 'EG': 'Egypt', 'SA': 'Saudi Arabia', 'AE': 'UAE',
+        'IL': 'Israel', 'TH': 'Thailand', 'VN': 'Vietnam', 'ID': 'Indonesia',
+        'PH': 'Philippines', 'MY': 'Malaysia', 'SG': 'Singapore', 'NZ': 'New Zealand'
+      };
+
+      async function getCountry() {
+        try {
+          const response = await fetch('https://ipapi.co/json/');
+          const data = await response.json();
+          return {
+            code: data.country_code || 'XX',
+            name: data.country_name || countryNames[data.country_code] || data.country_code || 'Unknown'
+          };
+        } catch {
+          try {
+            const backup = await fetch('https://ipinfo.io/json');
+            const data = await backup.json();
+            const code = data.country || 'XX';
+            return {
+              code: code,
+              name: countryNames[code] || data.country || 'Unknown'
+            };
+          } catch {
+            return { code: 'XX', name: 'Unknown' };
+          }
+        }
+      }
+
+      async function updateCountryStats() {
+        const country = await getCountry();
+        
+        let stats = JSON.parse(localStorage.getItem('countryStats')) || {};
+        stats[country.code] = (stats[country.code] || 0) + 1;
+        localStorage.setItem('countryStats', JSON.stringify(stats));
+        localStorage.setItem('userCountryCode', country.code);
+        localStorage.setItem('userCountryName', country.name);
+        
+        displayStats(stats, country);
+        statsPanel.style.display = 'block';
+      }
+
+      function displayStats(stats, userCountry) {
+        const sorted = Object.entries(stats).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        
+        countryList.innerHTML = sorted.map(([code, count]) => {
+          const name = countryNames[code] || code;
+          const flag = getFlagEmoji(code);
+          return `
+            <div class="country-item">
+              <span class="country-name">
+                <span class="country-flag">${flag}</span>
+                ${name}
+              </span>
+              <span class="country-count">${count}</span>
+            </div>
+          `;
+        }).join('');
+        
+        const total = Object.values(stats).reduce((a, b) => a + b, 0);
+        const userFlag = getFlagEmoji(userCountry.code);
+        
+        yourCountry.innerHTML = `
+          <i class="fas fa-circle"></i>
+          <span>You: <strong>${userCountry.name}</strong> <span class="country-flag">${userFlag}</span></span>
+          <span style="margin-left: auto; opacity: 0.7;">Total: ${total}</span>
+        `;
+      }
+
+      function updateViewCount() {
+        let views = localStorage.getItem('profileViews') || 0;
+        views = parseInt(views) + 1;
+        localStorage.setItem('profileViews', views);
+        viewCountSpan.textContent = views;
+      }
+
+      async function initStats() {
+        if (!sessionStorage.getItem('statsUpdated')) {
+          updateViewCount();
+          await updateCountryStats();
+          sessionStorage.setItem('statsUpdated', 'true');
+        } else {
+          const views = localStorage.getItem('profileViews') || 0;
+          viewCountSpan.textContent = views;
+          
+          const stats = JSON.parse(localStorage.getItem('countryStats')) || {};
+          const userCountry = {
+            code: localStorage.getItem('userCountryCode') || 'XX',
+            name: localStorage.getItem('userCountryName') || 'Unknown'
+          };
+          displayStats(stats, userCountry);
+          statsPanel.style.display = 'block';
+        }
+      }
+
+      let audioStarted = false;
+
+      function startSite() {
+        if (!audioStarted) {
+          bgAudio.volume = 0.5;
+          bgAudio.play().catch(() => {});
+          audioStarted = true;
+        }
+        enterOverlay.classList.add('hidden');
+        initStats();
+        loadComments();
+      }
+
+      enterOverlay.addEventListener('click', startSite);
+      
+      // Загружаем комментарии сразу
+      loadComments();
+    })();
+  </script>
+</body>
+</html>
