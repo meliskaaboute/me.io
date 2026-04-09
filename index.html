@@ -3,10 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>SweetPaw · Live Chat</title>
+  <title>SweetPaw · Profile</title>
+  <!-- Font Awesome для иконок -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* ----- БАЗОВЫЕ СБРОСЫ И ШРИФТЫ ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       min-height: 100vh;
@@ -18,110 +25,336 @@
       position: relative;
       overflow-x: hidden;
     }
-    #bgVideo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
-    .video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: -1; }
-    body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(-45deg, #0f0c29, #1a1a2e, #16213e, #0f0c29); background-size: 400% 400%; z-index: -3; }
-    .enter-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 0.3s, visibility 0.3s; }
-    .enter-overlay.hidden { opacity: 0; visibility: hidden; }
-    .enter-text { color: rgba(255,255,255,0.7); font-size: 14px; text-transform: lowercase; }
 
-    .mobile-toggle { position: fixed; top: 20px; right: 20px; z-index: 200; display: none; gap: 8px; }
-    .toggle-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(20, 15, 35, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(200, 180, 255, 0.3); color: #d0c5ff; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; }
-    .toggle-btn.active { background: #9f7aff; color: white; }
+    /* ----- ФОНОВОЕ ВИДЕО ----- */
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
 
-    .stats-panel { position: fixed; top: 20px; right: 20px; z-index: 150; background: rgba(20, 15, 35, 0.8); backdrop-filter: blur(15px); padding: 15px 20px; border-radius: 20px; border: 1px solid rgba(200, 180, 255, 0.2); min-width: 200px; max-height: 350px; overflow-y: auto; transition: opacity 0.3s, visibility 0.3s, transform 0.3s; }
-    .stats-panel.hidden { opacity: 0; visibility: hidden; transform: translateY(-10px); pointer-events: none; }
-    .stats-title { color: #d0c5ff; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px; }
-    .country-list { display: flex; flex-direction: column; gap: 6px; }
-    .country-item { display: flex; align-items: center; justify-content: space-between; color: white; font-size: 0.8rem; }
-    .country-flag { font-size: 1.1rem; margin-right: 6px; }
-    .country-count { color: #9f7aff; font-weight: 600; }
+    /* Затемнение поверх видео */
+    .video-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: -1;
+    }
 
-    .views-counter { position: fixed; bottom: 20px; left: 20px; z-index: 150; background: rgba(20, 15, 35, 0.6); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 40px; border: 1px solid rgba(200, 180, 255, 0.2); font-size: 0.8rem; color: #d0c5ff; display: flex; align-items: center; gap: 8px; }
+    /* Градиентный фон (если видео не загрузится) */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(-45deg, #0f0c29, #1a1a2e, #16213e, #0f0c29);
+      background-size: 400% 400%;
+      z-index: -3;
+    }
 
-    .live-chat { position: fixed; bottom: 20px; right: 20px; z-index: 150; width: 340px; max-height: 450px; background: rgba(15, 10, 25, 0.9); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(200, 180, 255, 0.25); display: flex; flex-direction: column; overflow: hidden; transition: opacity 0.3s, visibility 0.3s, transform 0.3s; }
-    .live-chat.hidden { opacity: 0; visibility: hidden; transform: translateY(10px); pointer-events: none; }
-    .chat-header { padding: 14px 18px; border-bottom: 1px solid rgba(200, 180, 255, 0.15); display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); }
-    .chat-header i { color: #44ff88; font-size: 0.7rem; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-    .chat-header h3 { color: white; font-size: 0.9rem; font-weight: 600; }
-    .online-count { margin-left: auto; background: rgba(68,255,136,0.15); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; color: #44ff88; }
-    .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; max-height: 280px; min-height: 200px; }
-    .message-item { display: flex; gap: 10px; animation: fadeIn 0.3s; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
-    .message-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #9f7aff, #c084fc); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: white; flex-shrink: 0; }
-    .message-content { flex: 1; }
-    .message-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
-    .message-name { font-weight: 600; color: #c5b8ff; font-size: 0.8rem; }
-    .message-time { font-size: 0.65rem; color: #7a72a0; }
-    .message-text { color: #f0eaff; font-size: 0.85rem; line-height: 1.4; word-break: break-word; }
-    .system-message { text-align: center; color: #7a72a0; font-size: 0.7rem; padding: 5px; }
-    .chat-input-area { padding: 14px 16px; border-top: 1px solid rgba(200, 180, 255, 0.15); display: flex; gap: 10px; background: rgba(0,0,0,0.2); }
-    .chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(200, 180, 255, 0.2); border-radius: 25px; padding: 10px 16px; color: white; font-size: 0.85rem; outline: none; }
-    .chat-input:focus { border-color: #9f7aff; }
-    .chat-send { background: #9f7aff; border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
+    /* ----- ОВЕРЛЕЙ «ВХОДА» (клик для запуска аудио) ----- */
+    .enter-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
 
-    .profile-card { max-width: 480px; width: 100%; background: transparent; border-radius: 42px; padding: 2rem 1.5rem; text-align: center; z-index: 10; }
-    .avatar-wrapper { width: 110px; height: 110px; margin: 0 auto 1.2rem; }
-    .avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.4); padding: 3px; }
-    .display-name { font-size: 1.8rem; font-weight: 600; color: white; }
-    .bio { font-size: 0.9rem; color: #e0dbf5; margin-bottom: 1.5rem; padding: 0.4rem 1.2rem; border-left: 3px solid #9f7aff; display: inline-block; }
-    .links-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-    .link-btn { background: transparent; border: 1.5px solid rgba(200, 180, 255, 0.35); border-radius: 20px; padding: 0.7rem 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; color: #f0eaff; font-weight: 500; font-size: 0.95rem; }
-    .link-btn i { font-size: 1.2rem; color: #d0c5ff; }
-    .footer-meta { margin-top: 1.2rem; font-size: 0.7rem; color: #b5aed4; display: flex; justify-content: center; gap: 12px; }
-    .footer-meta a { color: #d0c5ff; text-decoration: none; }
-    #bgAudio { display: none; }
+    .enter-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
 
-    /* Индикатор загрузки */
-    .sync-status { position: fixed; bottom: 20px; right: 20px; z-index: 300; background: rgba(0,0,0,0.5); padding: 4px 10px; border-radius: 20px; font-size: 0.65rem; color: #aaa; display: none; }
-    .sync-status.show { display: block; }
+    .enter-text {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      text-transform: lowercase;
+    }
 
+    /* ----- МОБИЛЬНАЯ КНОПКА ПЕРЕКЛЮЧЕНИЯ СТАТИСТИКИ ----- */
+    .mobile-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 200;
+      display: none;  /* показывается только на мобильных */
+      gap: 8px;
+    }
+
+    .toggle-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(20, 15, 35, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(200, 180, 255, 0.3);
+      color: #d0c5ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .toggle-btn.active {
+      background: #9f7aff;
+      color: white;
+    }
+
+    /* ----- ПАНЕЛЬ СТАТИСТИКИ ПО СТРАНАМ ----- */
+    .stats-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 150;
+      background: rgba(20, 15, 35, 0.8);
+      backdrop-filter: blur(15px);
+      padding: 15px 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(200, 180, 255, 0.2);
+      min-width: 200px;
+      max-height: 350px;
+      overflow-y: auto;
+      transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+    }
+
+    .stats-panel.hidden {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      pointer-events: none;
+    }
+
+    .stats-title {
+      color: #d0c5ff;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .country-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .country-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      font-size: 0.8rem;
+    }
+
+    .country-flag {
+      font-size: 1.1rem;
+      margin-right: 6px;
+    }
+
+    .country-count {
+      color: #9f7aff;
+      font-weight: 600;
+    }
+
+    /* ----- СЧЁТЧИК ПРОСМОТРОВ ----- */
+    .views-counter {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 150;
+      background: rgba(20, 15, 35, 0.6);
+      backdrop-filter: blur(10px);
+      padding: 8px 16px;
+      border-radius: 40px;
+      border: 1px solid rgba(200, 180, 255, 0.2);
+      font-size: 0.8rem;
+      color: #d0c5ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ----- ПРОФИЛЬНАЯ КАРТОЧКА ----- */
+    .profile-card {
+      max-width: 480px;
+      width: 100%;
+      background: transparent;
+      border-radius: 42px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .avatar-wrapper {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 1.2rem;
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255, 255, 255, 0.4);
+      padding: 3px;
+    }
+
+    .display-name {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    .bio {
+      font-size: 0.9rem;
+      color: #e0dbf5;
+      margin-bottom: 1.5rem;
+      padding: 0.4rem 1.2rem;
+      border-left: 3px solid #9f7aff;
+      display: inline-block;
+    }
+
+    /* Кнопки соцсетей */
+    .links-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .link-btn {
+      background: transparent;
+      border: 1.5px solid rgba(200, 180, 255, 0.35);
+      border-radius: 20px;
+      padding: 0.7rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #f0eaff;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .link-btn i {
+      font-size: 1.2rem;
+      color: #d0c5ff;
+    }
+
+    .footer-meta {
+      margin-top: 1.2rem;
+      font-size: 0.7rem;
+      color: #b5aed4;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .footer-meta a {
+      color: #d0c5ff;
+      text-decoration: none;
+    }
+
+    /* Скрытый аудиоэлемент */
+    #bgAudio {
+      display: none;
+    }
+
+    /* ----- АДАПТИВ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ ----- */
     @media (max-width: 768px) {
-      body { padding: 0.8rem; padding-top: 70px; }
-      .mobile-toggle { display: flex; }
-      .live-chat { width: calc(100% - 20px); right: 10px; left: 10px; bottom: 10px; max-height: 380px; }
-      .stats-panel { top: 70px; right: 10px; left: 10px; width: auto; max-height: 250px; }
-      .views-counter { bottom: auto; top: 10px; left: 10px; }
-      .profile-card { padding: 1rem 0.5rem; }
+      body {
+        padding: 0.8rem;
+        padding-top: 70px;
+      }
+
+      .mobile-toggle {
+        display: flex;   /* показываем кнопку статистики на мобильных */
+      }
+
+      .stats-panel {
+        top: 70px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        max-height: 250px;
+      }
+
+      .views-counter {
+        bottom: auto;
+        top: 10px;
+        left: 10px;
+      }
+
+      .profile-card {
+        padding: 1rem 0.5rem;
+      }
     }
   </style>
 </head>
 <body>
-  <video id="bgVideo" autoplay muted loop playsinline><source src="video/background.mp4" type="video/mp4"></video>
+  <!-- Фоновое видео -->
+  <video id="bgVideo" autoplay muted loop playsinline>
+    <source src="video/background.mp4" type="video/mp4">
+  </video>
   <div class="video-overlay"></div>
-  <audio id="bgAudio" loop><source src="music/background.mp3" type="audio/mpeg"></audio>
 
+  <!-- Фоновая музыка (запускается по клику на оверлей) -->
+  <audio id="bgAudio" loop>
+    <source src="music/background.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Кнопка для мобильных: показать/скрыть панель статистики -->
   <div class="mobile-toggle" id="mobileToggle">
-    <div class="toggle-btn active" id="toggleStats"><i class="fas fa-chart-bar"></i></div>
-    <div class="toggle-btn active" id="toggleChat"><i class="far fa-comment-dots"></i></div>
+    <div class="toggle-btn active" id="toggleStats">
+      <i class="fas fa-chart-bar"></i>
+    </div>
+    <!-- Вторая кнопка (чат) убрана, так как чат удалён -->
   </div>
 
+  <!-- Панель статистики посетителей по странам -->
   <div class="stats-panel" id="statsPanel">
     <div class="stats-title"><i class="fas fa-globe"></i> Visitors</div>
-    <div class="country-list" id="countryList"></div>
-  </div>
-
-  <div class="views-counter"><i class="fas fa-eye"></i> Views: <span id="viewCount">0</span></div>
-  <div class="sync-status" id="syncStatus">🔄 Syncing...</div>
-
-  <div class="live-chat" id="liveChat">
-    <div class="chat-header">
-      <i class="fas fa-circle"></i>
-      <h3>LIVE CHAT</h3>
-      <span class="online-count" id="onlineCount">1 online</span>
-    </div>
-    <div class="chat-messages" id="chatMessages"><div class="system-message">Connecting...</div></div>
-    <div class="chat-input-area">
-      <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." maxlength="150">
-      <button class="chat-send" id="chatSend"><i class="fas fa-paper-plane"></i></button>
+    <div class="country-list" id="countryList">
+      <!-- Список стран будет заполнен динамически -->
     </div>
   </div>
 
+  <!-- Счётчик просмотров профиля -->
+  <div class="views-counter">
+    <i class="fas fa-eye"></i> Views: <span id="viewCount">0</span>
+  </div>
+
+  <!-- Основная карточка профиля -->
   <div class="profile-card">
-    <div class="avatar-wrapper"><img class="avatar" id="avatarImg" src="avatar/avatar.png" onerror="this.src='https://ui-avatars.com/api/?name=SweetPaw&length=2&background=2a1e3c&color=fff&size=128'"></div>
+    <div class="avatar-wrapper">
+      <img class="avatar" id="avatarImg" src="avatar/avatar.png"
+           onerror="this.src='https://ui-avatars.com/api/?name=SweetPaw&length=2&background=2a1e3c&color=fff&size=128'">
+    </div>
     <div class="display-name">SweetPaw</div>
-    <div class="bio"><i class="fas fa-terminal" style="margin-right:6px;opacity:0.9"></i>digital creator · 19 ✦</div>
+    <div class="bio">
+      <i class="fas fa-terminal" style="margin-right:6px;opacity:0.9"></i>digital creator · 19 ✦
+    </div>
+
+    <!-- Ссылки на соцсети -->
     <div class="links-grid">
       <a href="https://x.com/teriyakimoki" class="link-btn"><i class="fab fa-twitter"></i> Twitter / X</a>
       <a href="https://discord.com/users/385376961590984715" class="link-btn"><i class="fab fa-discord"></i> Discord</a>
@@ -130,236 +363,166 @@
       <a href="https://youtube.com/playlist?list=PLPODqnI0uKxVssMZQO6cq7advtmk_Lacq" class="link-btn"><i class="fab fa-youtube"></i> YouTube</a>
       <a href="https://twitch.tv/meliska_j" class="link-btn"><i class="fab fa-twitch"></i> Twitch</a>
     </div>
-    <div class="footer-meta"><span><i class="far fa-gem"></i> links</span> ◈ <a href="https://t.me/std_root"><i class="far fa-envelope"></i> contact</a></div>
+
+    <div class="footer-meta">
+      <span><i class="far fa-gem"></i> links</span> ◈
+      <a href="https://t.me/std_root"><i class="far fa-envelope"></i> contact</a>
+    </div>
   </div>
 
-  <div class="enter-overlay" id="enterOverlay"><div class="enter-text">click to enter</div></div>
+  <!-- Оверлей «клик для входа» (активирует аудио) -->
+  <div class="enter-overlay" id="enterOverlay">
+    <div class="enter-text">click to enter</div>
+  </div>
 
   <script>
     (function() {
-      // ========== КОНФИГУРАЦИЯ ==========
-      // ЗАМЕНИТЕ НА СВОЙ API КЛЮЧ ОТ JSONBIN.IO
-      const JSONBIN_API_KEY = '$2a$10$FPlK2jMNTWqD2q7nKVd8l.RmjOHBHroIRG9vK8gAUp/n7icOoQKjK'; // Получите на https://jsonbin.io
-      const JSONBIN_BIN_ID = '69d7cc6736566621a895d987'; // Создайте bin на jsonbin.io
-      // ====================================
+      // ======================== КОНФИГУРАЦИЯ ========================
+      // В этой версии чат полностью удалён. Оставлены только:
+      // - счётчик просмотров профиля (локальный, через localStorage)
+      // - статистика посетителей по странам (использует ipapi.co)
+      // - управление видимостью панели статистики (особенно для мобильных)
+      // - фоновое видео и аудио (запускается по клику на оверлей)
+      // ===============================================================
 
+      // ---------- DOM ЭЛЕМЕНТЫ ----------
       const bgAudio = document.getElementById('bgAudio');
       const enterOverlay = document.getElementById('enterOverlay');
       const viewCountSpan = document.getElementById('viewCount');
       const statsPanel = document.getElementById('statsPanel');
       const countryList = document.getElementById('countryList');
-      const chatMessages = document.getElementById('chatMessages');
-      const chatInput = document.getElementById('chatInput');
-      const chatSend = document.getElementById('chatSend');
-      const onlineCount = document.getElementById('onlineCount');
-      const liveChat = document.getElementById('liveChat');
       const toggleStats = document.getElementById('toggleStats');
-      const toggleChat = document.getElementById('toggleChat');
-      const syncStatus = document.getElementById('syncStatus');
 
-      // Генерация имени
-      const adjectives = ['Happy','Lucky','Sunny','Cool','Mega','Neon','Cyber'];
-      const nouns = ['Fox','Cat','Wolf','Panda','Tiger','Dragon','Ninja'];
-      let userName = sessionStorage.getItem('chatName');
-      let userAvatar = sessionStorage.getItem('chatAvatar');
-      if (!userName) {
-        userName = adjectives[Math.floor(Math.random()*adjectives.length)] + nouns[Math.floor(Math.random()*nouns.length)] + Math.floor(Math.random()*100);
-        userAvatar = userName.substring(0,2).toUpperCase();
-        sessionStorage.setItem('chatName', userName);
-        sessionStorage.setItem('chatAvatar', userAvatar);
+      // ---------- ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ: ФЛАГ ПО КОДУ СТРАНЫ ----------
+      function getFlag(countryCode) {
+        if (!countryCode || countryCode === 'XX') return '🌍';
+        // Преобразование двухбуквенного кода в символы флага (Regional Indicator Symbols)
+        return String.fromCodePoint(...countryCode.toUpperCase().split('').map(c => 127397 + c.charCodeAt()));
       }
 
-      // Функция escape
-      function escape(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+      // Названия стран (можно расширить при необходимости)
+      const countryNames = {
+        RU: 'Russia', US: 'USA', GB: 'UK', DE: 'Germany', FR: 'France',
+        UA: 'Ukraine', BY: 'Belarus', KZ: 'Kazakhstan', CN: 'China',
+        JP: 'Japan', KR: 'S.Korea', IN: 'India', BR: 'Brazil', CA: 'Canada',
+        AU: 'Australia', IT: 'Italy', ES: 'Spain', NL: 'Netherlands',
+        PL: 'Poland', TR: 'Turkey'
+      };
 
-      // Отображение сообщений
-      function displayMessages(msgs) {
-        if (!msgs || !msgs.length) { 
-          chatMessages.innerHTML = '<div class="system-message">No messages yet 👋</div>'; 
-          return; 
-        }
-        chatMessages.innerHTML = msgs.slice(-50).map(m => {
-          if (m.type === 'system') return `<div class="system-message">${escape(m.text)}</div>`;
-          const d = new Date(m.time);
-          const time = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-          return `<div class="message-item"><div class="message-avatar">${escape(m.avatar||'?')}</div><div class="message-content"><div class="message-header"><span class="message-name">${escape(m.name)}</span><span class="message-time">${time}</span></div><div class="message-text">${escape(m.text)}</div></div></div>`;
-        }).join('');
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-
-      // Загрузка сообщений с сервера
-      async function loadMessagesFromServer() {
-        if (!JSONBIN_API_KEY || JSONBIN_API_KEY.includes('YOUR_API_KEY')) {
-          // Если нет API ключа, используем localStorage
-          const msgs = JSON.parse(localStorage.getItem('livechat_msgs')) || [];
-          displayMessages(msgs);
-          return;
-        }
-
-        syncStatus.classList.add('show');
-        try {
-          const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-            headers: { 'X-Master-Key': JSONBIN_API_KEY }
-          });
-          const data = await response.json();
-          const msgs = data.record.messages || [];
-          displayMessages(msgs);
-          localStorage.setItem('livechat_msgs', JSON.stringify(msgs));
-        } catch(e) {
-          console.log('Using local storage');
-          const msgs = JSON.parse(localStorage.getItem('livechat_msgs')) || [];
-          displayMessages(msgs);
-        }
-        syncStatus.classList.remove('show');
-      }
-
-      // Отправка сообщения на сервер
-      async function sendMessageToServer(text, type = 'user') {
-        if (!JSONBIN_API_KEY || JSONBIN_API_KEY.includes('YOUR_API_KEY')) {
-          // Без API ключа - только localStorage
-          const msgs = JSON.parse(localStorage.getItem('livechat_msgs')) || [];
-          msgs.push({ text, name: userName, avatar: userAvatar, time: Date.now(), type });
-          if (msgs.length > 100) msgs.splice(0, msgs.length - 100);
-          localStorage.setItem('livechat_msgs', JSON.stringify(msgs));
-          displayMessages(msgs);
-          return;
-        }
-
-        syncStatus.classList.add('show');
-        try {
-          // Получаем текущие сообщения
-          const getRes = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-            headers: { 'X-Master-Key': JSONBIN_API_KEY }
-          });
-          const data = await getRes.json();
-          const msgs = data.record.messages || [];
-          
-          // Добавляем новое
-          msgs.push({ text, name: userName, avatar: userAvatar, time: Date.now(), type });
-          if (msgs.length > 100) msgs.splice(0, msgs.length - 100);
-          
-          // Отправляем обратно
-          await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Master-Key': JSONBIN_API_KEY
-            },
-            body: JSON.stringify({ messages: msgs })
-          });
-          
-          displayMessages(msgs);
-          localStorage.setItem('livechat_msgs', JSON.stringify(msgs));
-        } catch(e) {
-          console.log('Failed to send to server');
-        }
-        syncStatus.classList.remove('show');
-      }
-
-      // Отправка сообщения
-      function sendMessage() {
-        const text = chatInput.value.trim();
-        if (text) {
-          sendMessageToServer(text);
-          chatInput.value = '';
-        }
-      }
-
-      // Отправка сообщения о входе
-      async function sendJoinMessage() {
-        const msgs = JSON.parse(localStorage.getItem('livechat_msgs')) || [];
-        const recent = msgs.some(m => m.type === 'system' && m.text.includes(userName) && Date.now() - m.time < 5000);
-        if (!recent) {
-          await sendMessageToServer(`${userName} joined`, 'system');
-        }
-      }
-
-      chatSend.addEventListener('click', sendMessage);
-      chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
-
-      // Периодическая синхронизация
-      let lastSync = 0;
-      setInterval(async () => {
-        await loadMessagesFromServer();
-      }, 3000);
-
-      // Статистика (остаётся локальной)
-      function getFlag(code) {
-        if (!code || code === 'XX') return '🌍';
-        return String.fromCodePoint(...code.toUpperCase().split('').map(c => 127397 + c.charCodeAt()));
-      }
-      const names = { RU:'Russia', US:'USA', GB:'UK', DE:'Germany', FR:'France', UA:'Ukraine', BY:'Belarus', KZ:'Kazakhstan', CN:'China', JP:'Japan', KR:'S.Korea', IN:'India', BR:'Brazil', CA:'Canada', AU:'Australia', IT:'Italy', ES:'Spain', NL:'Netherlands', PL:'Poland', TR:'Turkey' };
-
+      // ---------- ОБНОВЛЕНИЕ СТАТИСТИКИ ПО СТРАНАМ ----------
       async function updateStats() {
         try {
-          const res = await fetch('https://ipapi.co/json/');
-          const d = await res.json();
-          const code = d.country_code || 'XX';
+          // Определяем страну текущего посетителя через бесплатный API (без ключа)
+          const response = await fetch('https://ipapi.co/json/');
+          const data = await response.json();
+          const countryCode = data.country_code || 'XX';
+
+          // Загружаем существующую статистику из localStorage
           let stats = JSON.parse(localStorage.getItem('countryStats')) || {};
-          stats[code] = (stats[code] || 0) + 1;
+          stats[countryCode] = (stats[countryCode] || 0) + 1;
           localStorage.setItem('countryStats', JSON.stringify(stats));
-          const sorted = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0,8);
-          countryList.innerHTML = sorted.map(([c, n]) => `<div class="country-item"><span><span class="country-flag">${getFlag(c)}</span> ${names[c]||c}</span><span class="country-count">${n}</span></div>`).join('');
+
+          // Сортируем по убыванию и берём первые 8 стран для отображения
+          const sorted = Object.entries(stats)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8);
+
+          // Рендерим список стран
+          countryList.innerHTML = sorted.map(([code, count]) => {
+            const flag = getFlag(code);
+            const name = countryNames[code] || code;
+            return `<div class="country-item">
+                      <span><span class="country-flag">${flag}</span> ${name}</span>
+                      <span class="country-count">${count}</span>
+                    </div>`;
+          }).join('');
+
           statsPanel.style.display = 'block';
-        } catch(e) {}
+        } catch (error) {
+          console.warn('Не удалось получить данные о местоположении, статистика стран не обновлена.');
+          // Если API недоступен, просто показываем сохранённые данные
+          const stats = JSON.parse(localStorage.getItem('countryStats')) || {};
+          const sorted = Object.entries(stats)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8);
+          countryList.innerHTML = sorted.map(([code, count]) => {
+            const flag = getFlag(code);
+            const name = countryNames[code] || code;
+            return `<div class="country-item">
+                      <span><span class="country-flag">${flag}</span> ${name}</span>
+                      <span class="country-count">${count}</span>
+                    </div>`;
+          }).join('');
+        }
       }
 
+      // ---------- ОБНОВЛЕНИЕ СЧЁТЧИКА ПРОСМОТРОВ ----------
       function updateViews() {
-        let v = parseInt(localStorage.getItem('profileViews')) || 0;
-        v++; localStorage.setItem('profileViews', v);
-        viewCountSpan.textContent = v;
+        let views = parseInt(localStorage.getItem('profileViews')) || 0;
+        views++;
+        localStorage.setItem('profileViews', views);
+        viewCountSpan.textContent = views;
       }
 
+      // ---------- ИНИЦИАЛИЗАЦИЯ СТАТИСТИКИ (ВЫЗЫВАЕТСЯ ОДИН РАЗ ЗА СЕССИЮ) ----------
       async function initStats() {
         if (!sessionStorage.getItem('statsUpdated')) {
+          // Первое посещение за эту сессию — увеличиваем счётчик и обновляем страны
           updateViews();
           await updateStats();
           sessionStorage.setItem('statsUpdated', '1');
         } else {
+          // Просто показываем сохранённые значения
           viewCountSpan.textContent = localStorage.getItem('profileViews') || 0;
           const stats = JSON.parse(localStorage.getItem('countryStats')) || {};
-          const sorted = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0,8);
-          countryList.innerHTML = sorted.map(([c, n]) => `<div class="country-item"><span><span class="country-flag">${getFlag(c)}</span> ${names[c]||c}</span><span class="country-count">${n}</span></div>`).join('');
+          const sorted = Object.entries(stats)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8);
+          countryList.innerHTML = sorted.map(([code, count]) => {
+            const flag = getFlag(code);
+            const name = countryNames[code] || code;
+            return `<div class="country-item">
+                      <span><span class="country-flag">${flag}</span> ${name}</span>
+                      <span class="country-count">${count}</span>
+                    </div>`;
+          }).join('');
           statsPanel.style.display = 'block';
         }
       }
 
-      // Онлайн (локальный)
-      function updateOnline() {
-        const online = JSON.parse(localStorage.getItem('livechat_online')) || {};
-        const userId = sessionStorage.getItem('userId') || 'u_' + Date.now();
-        online[userId] = Date.now();
-        const now = Date.now();
-        Object.keys(online).forEach(id => { if (now - online[id] > 30000) delete online[id]; });
-        localStorage.setItem('livechat_online', JSON.stringify(online));
-        onlineCount.textContent = Object.keys(online).length + ' online';
-      }
-      setInterval(updateOnline, 10000);
-      updateOnline();
-
-      // Управление видимостью
+      // ---------- УПРАВЛЕНИЕ ВИДИМОСТЬЮ ПАНЕЛИ СТАТИСТИКИ ----------
       toggleStats.addEventListener('click', () => {
         statsPanel.classList.toggle('hidden');
         toggleStats.classList.toggle('active');
       });
-      toggleChat.addEventListener('click', () => {
-        liveChat.classList.toggle('hidden');
-        toggleChat.classList.toggle('active');
-      });
 
-      // Запуск
+      // ---------- ЗАПУСК АУДИО И СТАТИСТИКИ ПО КЛИКУ НА ОВЕРЛЕЙ ----------
       let audioStarted = false;
+
       async function startSite() {
-        if (!audioStarted) { bgAudio.volume = 0.3; bgAudio.play().catch(()=>{}); audioStarted = true; }
+        // Запускаем фоновую музыку (если не запрещено автополитикой браузера)
+        if (!audioStarted) {
+          bgAudio.volume = 0.3;
+          bgAudio.play().catch(() => {
+            // Браузер может заблокировать автовоспроизведение — игнорируем
+          });
+          audioStarted = true;
+        }
+
+        // Скрываем оверлей
         enterOverlay.classList.add('hidden');
+
+        // Инициализируем статистику (если ещё не сделано)
         initStats();
-        await loadMessagesFromServer();
-        await sendJoinMessage();
       }
+
       enterOverlay.addEventListener('click', startSite);
-      
-      // Предзагрузка
-      loadMessagesFromServer();
+
+      // ---------- ПРЕДЗАГРУЗКА СТАТИСТИКИ (НА СЛУЧАЙ, ЕСЛИ ОВЕРЛЕЙ НЕ НАЖМУТ) ----------
+      // Вызываем initStats без увеличения счётчика, если сессия уже была обновлена
+      if (sessionStorage.getItem('statsUpdated')) {
+        initStats();
+      }
     })();
   </script>
 </body>
